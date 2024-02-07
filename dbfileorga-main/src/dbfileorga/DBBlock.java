@@ -139,6 +139,7 @@ public class DBBlock implements Iterable<Record> {
 
 	@Override
 	public Iterator<Record> iterator() {
+
 		return new BlockIterator();
 	}
 	
@@ -147,7 +148,8 @@ public class DBBlock implements Iterable<Record> {
 	    private int currRec=0;
  
 	    public  BlockIterator() {
-            this.currRec = 0;
+
+			this.currRec = 0;
         }
 	    
         public boolean hasNext() {
@@ -168,7 +170,8 @@ public class DBBlock implements Iterable<Record> {
  
         @Override
         public void remove() {
-        	throw new UnsupportedOperationException();
+
+			throw new UnsupportedOperationException();
         }
     } 
 	

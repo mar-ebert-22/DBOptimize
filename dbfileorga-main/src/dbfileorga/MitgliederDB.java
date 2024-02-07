@@ -15,6 +15,7 @@ public class MitgliederDB implements Iterable<Record>
 		
 	}
 	public MitgliederDB(){
+
 		initDB();
 	}
 	
@@ -92,6 +93,7 @@ public class MitgliederDB implements Iterable<Record>
 	}
 		
 	public DBBlock getBlock(int i){
+
 		return db[i];
 	}
 	
@@ -102,7 +104,24 @@ public class MitgliederDB implements Iterable<Record>
 	 * @return the record matching the search term
 	 */
 	public Record read(int recNum){
-		//TODO implement
+
+		int recordCounter = 0;
+
+		for (int i = 0; i < db.length; i++) { //gehe die ganzen Blöcke der DB durch
+
+			if (recNum <= (recordCounter + db[i].getNumberOfRecords())){
+				//Vergleich der recordNumber mit dem Zähler der Records
+
+				return db[i].getRecord(recNum - recordCounter);
+				//Return des Records verringert durch unseren Counter um den genaun Record aus dem Block zu bekommen,
+				// weil Records innerhalb eines Blocks mit 1-5 nummeriert sind durch Methode getRecord()
+			}
+			else {
+				//record nicht gefunden, also erhöhen wir unseren RecordCounter
+				recordCounter += db[i].getNumberOfRecords();
+			}
+		}
+
 		return null;
 	}
 	
@@ -178,7 +197,8 @@ public class MitgliederDB implements Iterable<Record>
 	 
 	        @Override
 	        public void remove() {
-	        	throw new UnsupportedOperationException();
+
+				throw new UnsupportedOperationException();
 	        }
 	    } 
 	 

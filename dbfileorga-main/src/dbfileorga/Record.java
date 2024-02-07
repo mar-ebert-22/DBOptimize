@@ -14,18 +14,22 @@ public class Record {
 	}
 	
 	public Record (String record){
-		 this(record.toCharArray());
+
+		this(record.toCharArray());
 	}
 	
 	public int length(){
+
 		return record.length;
 	}
 	
 	public char charAt(int i){
+
 		return record[i];
 	}
 		
 	public String toString(){
+
 		return 	new String (record);
 	}
 	

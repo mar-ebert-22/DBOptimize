@@ -165,7 +165,13 @@ public class MitgliederDB implements Iterable<Record>
 	 * @return the record number of the inserted record
 	 */
 	public int insert(Record record){
-		//TODO implement
+
+		// ToDo freie Stelle suchen
+
+		// ToDo Record am Ende (nächst freie Stelle) einfügen
+
+		// ToDo recordNumber der eingefügten Stelle returnen
+
 		return -1;
 	}
 	
@@ -174,7 +180,8 @@ public class MitgliederDB implements Iterable<Record>
 	 * @param numRecord number of the record to be deleted
 	 */
 	public void delete(int numRecord){
-		//TODO implement
+		// TODO  numRecord suchen
+		// ToDo  numRecord als gelöscht markern?
 	}
 	
 	/**

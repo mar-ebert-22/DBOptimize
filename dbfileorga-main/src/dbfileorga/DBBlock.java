@@ -110,7 +110,7 @@ public class DBBlock implements Iterable<Record> {
 
 
 	private int findEmptySpace(){
-		for (int i = 0; i <block.length;++i){
+		for (int i = 0; i < block.length;++i){
 			if (block[i] == DEFCHAR){
 				return i;
 			}

@@ -49,7 +49,7 @@ public class Record {
 				currAttributeNum++;
 			}
 		}
-		return null; 
+		return null;
 	}
 	
 	

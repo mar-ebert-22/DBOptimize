@@ -130,9 +130,33 @@ public class MitgliederDB implements Iterable<Record>
 	 * @param searchTerm the term to search for
 	 * @return the number of the record in the DB -1 if not found
 	 */
+
+	//searchTerm ist die Mitgliedsnummer, das 1.Attribut in einem Record
 	public int findPos(String searchTerm){
-		//TODO implement
-		return -1;
+
+		int recordCounter = 1;
+
+		for (int i = 0; i < db.length; i++) { //gehe die ganzen Blöcke der DB durch
+
+			DBBlock currBlock = db[i];
+
+			Iterator<Record> recordIterator = currBlock.iterator();
+
+			while(recordIterator.hasNext()){
+
+				if(searchTerm.equals(recordIterator.next().getAttribute(1))) {
+					System.out.println("ich bin hier rein gekommen");
+					return recordCounter ;
+				}
+				else{
+
+					recordCounter++;
+				}
+
+			}
+
+		}
+			return -1;
 	}
 	
 	/**

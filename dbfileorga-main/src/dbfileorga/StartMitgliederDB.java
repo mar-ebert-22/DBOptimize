@@ -4,17 +4,21 @@ public class StartMitgliederDB {
 
 	public static void main(String[] args) {
 			MitgliederDB db = new MitgliederDB(false);
-			System.out.println(db);
+			//System.out.println(db);
 			
-			// TODO test your implementation with the following use cases  
+			//  test implementation with the following use cases
 			
 			// read the a record number e.g. 32 (86;3;13;Brutt;Jasmin;12.12.04;01.01.16;;7,5)
-			Record rec = db.read(32);
-			System.out.println(rec);
+			Record rec ;
+			//db.read(32);
+//			System.out.println(rec);
 			
 			//find and read a record with a given Mitgliedesnummer e.g 95
-//			rec = db.read(db.findPos("95"));
-//			System.out.println(rec);
+			rec = db.read(db.findPos("121"));
+			//int recNum = db.findPos("121");
+
+			//System.out.println(recNum);
+			System.out.println(rec);
 //
 //			//insert Hans Meier
 //			int newRecNum = db.insert(new Record("122;2;44;Meier;Hans;07.05.01;01.03.10;120;15"));

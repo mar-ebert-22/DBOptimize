@@ -176,7 +176,7 @@ public class MitgliederDB implements Iterable<Record>
 
 			if (insertSuccess == -1) {
 
-				System.out.println("Block ist voll");
+				//System.out.println("Block ist voll");
 				recordCounter += currBlock.getNumberOfRecords();
 			} else {
 
@@ -189,9 +189,26 @@ public class MitgliederDB implements Iterable<Record>
 	 * Deletes the record specified 
 	 * @param numRecord number of the record to be deleted
 	 */
+	//numRecord ist Mitgliedsnummer
 	public void delete(int numRecord){
-		// TODO  numRecord suchen
-		// ToDo  numRecord als gelöscht markern?
+
+		int recordCounter = 1;
+
+		for (int i = 0; i < db.length; i++) { // gehe die ganzen Blöcke der DB durch
+
+				DBBlock currBlock = db[i];
+
+			if(numRecord <= (recordCounter + db[i].getNumberOfRecords())){
+
+				currBlock.deleteRecord(numRecord-recordCounter);
+				System.out.println("Habs gelöscht bro");
+				break;
+			}
+			else{
+				recordCounter += db[i].getNumberOfRecords();
+			}
+
+		}
 	}
 	
 	/**
@@ -200,8 +217,28 @@ public class MitgliederDB implements Iterable<Record>
 	 * @param record the new record
 	 * 
 	 */
+	//numRecord = Datensatznummer; record = geänderter Datensatz
 	public void modify(int numRecord, Record record){
-		//TODO
+		//Datensatz suchen
+		//Datensatz nicht vorhanden
+		if(numRecord == -1){
+			System.out.println("Record not modifiable");
+		}
+		int recordCounter = 1;
+		for (int i = 0; i < db.length; i++) { // gehe die ganzen Blöcke der DB durch
+			DBBlock currBlock = db[i];
+
+			if(numRecord <= (recordCounter + db[i].getNumberOfRecords())){
+				delete(numRecord);
+				System.out.println("yo");
+				currBlock.insertRecordAtTheEnd(record);
+				//insert(record);
+				System.out.println("hab inserted bre");
+			}
+			else{
+				recordCounter += db[i].getNumberOfRecords();
+			}
+		}
 	}
 
 	

@@ -82,7 +82,41 @@ public class DBBlock implements Iterable<Record> {
 	 * deletes the content of the block
 	 */
 	public void delete(){
+
 		block = new char[BLOCKSIZE];
+	}
+
+	public void deleteRecord(int recNum) {
+		int currRecNum = 1; // Beginne mit 1
+		int startPos = -1;
+
+		for (int i = 0; i < block.length; i++) {
+			if (block[i] == RECDEL) {
+				//recNum checken
+				if (currRecNum == recNum) {
+					startPos = i + 1;
+					break;
+				}
+				currRecNum++; //nächsten Datensatz
+			}
+		}
+
+		if (startPos != -1) {
+
+			int endPos = getEndPosOfRecord(startPos);
+
+
+			if (endPos != -1) {
+				//  nachfolgenden Datensätze nach vorne
+				int length = endPos - startPos;
+				System.arraycopy(block, endPos, block, startPos, block.length - endPos);
+
+				//restlichen Zeichen am Ende auf DEFCHAR
+				for (int i = block.length - length; i < block.length; i++) {
+					block[i] = DEFCHAR;
+				}
+			}
+		}
 	}
 	
 

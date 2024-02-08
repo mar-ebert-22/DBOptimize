@@ -21,18 +21,26 @@ public class StartMitgliederDB {
 			//System.out.println(rec);
 //
 //			//insert Hans Meier
-			int newRecNum = db.insert(new Record("122;2;44;Meier;Hans;07.05.01;01.03.10;120;15"));
-			System.out.println(db.read(newRecNum));
-		    System.out.println(newRecNum);
+			//int newRecNum = db.insert(new Record("122;2;44;Meier;Hans;07.05.01;01.03.10;120;15"));
+			//System.out.println(db.read(newRecNum));
+		    //System.out.println(newRecNum);
+			//System.out.println(db);
 //			//modify (ID95 Steffi Brahms wird zu ID 95 Steffi Bach)
-//			db.modify(db.findPos("95"), new Record("95;3;13;Bach;Steffi;04.04.06;01.02.16;;5"));
-//			System.out.println(db);
+			db.modify(db.findPos("79"), new Record("79;3;13;Ekelig;Bernd;17.08.08;01.01.17;;2,5"));
+			db.insert(new Record("125;2;44;Ficker;Hans;07.05.01;01.03.10;120;15"));
+			System.out.println(db);
 //
 //			//delete the record with Mitgliedsnummer 95
-//			db.delete(db.findPos("95"));
+
+			/*System.out.println(db);
+			db.delete(db.findPos("95"));
+			int newRecNum = db.insert(new Record("122;2;44;Meier;Hans;07.05.01;01.03.10;120;15"));
+			System.out.println(db);*/
+
+//			int newRecNum2 = db.insert(new Record("187;2;44;Frenz;Hans;07.05.01;01.03.10;120;15"));
 //			System.out.println(db);
-			
-			
+
+
 	}
 
 }

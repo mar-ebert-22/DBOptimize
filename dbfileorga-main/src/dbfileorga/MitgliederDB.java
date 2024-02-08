@@ -166,13 +166,23 @@ public class MitgliederDB implements Iterable<Record>
 	 */
 	public int insert(Record record){
 
-		// ToDo freie Stelle suchen
+		int recordCounter = 1;
 
-		// ToDo Record am Ende (nächst freie Stelle) einfügen
+		for (int i = 0; i < db.length; i++) { // gehe die ganzen Blöcke der DB durch
 
-		// ToDo recordNumber der eingefügten Stelle returnen
+			DBBlock currBlock = db[i];
 
-		return -1;
+			int insertSuccess = currBlock.insertRecordAtTheEnd(record);
+
+			if (insertSuccess == -1) {
+
+				System.out.println("Block ist voll");
+				recordCounter += currBlock.getNumberOfRecords();
+			} else {
+
+				return recordCounter;
+			}
+		} return -1;
 	}
 	
 	/**

@@ -18,7 +18,7 @@ public class StartMitgliederDBOrdered {
 			System.out.println(rec);
 	
 			//insert Hans Maier
-			int newRecNum = db.insert(new Record("122;2;44;Meier;Hans;07.05.01;01.03.10;120;15"));
+			int newRecNum = db.insert(new Record("122;2;44;Meier;Hans;07.05.01;01.03.10;120;15"), true);
 			System.out.println(db.read(newRecNum));
 			
 			//modify (ID95 Steffi Brahms wird zu ID 95 Steffi Bach)

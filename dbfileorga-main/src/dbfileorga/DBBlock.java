@@ -151,6 +151,12 @@ public class DBBlock implements Iterable<Record> {
 		}
 		return block.length;		
 	}
+
+	public int insertRecordAtRightPos(int pos){
+
+
+		return -1;
+	}
 	
 	@Override
 	public String toString(){

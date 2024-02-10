@@ -164,25 +164,50 @@ public class MitgliederDB implements Iterable<Record>
 	 * @param record
 	 * @return the record number of the inserted record
 	 */
-	public int insert(Record record){
+	public int insert(Record record, Boolean sorted){
 
 		int recordCounter = 1;
 
-		for (int i = 0; i < db.length; i++) { // gehe die ganzen Blöcke der DB durch
 
-			DBBlock currBlock = db[i];
+		if(sorted){
 
-			int insertSuccess = currBlock.insertRecordAtTheEnd(record);
+			for (int i = 0; i < db.length; i++) { // gehe die ganzen Blöcke der DB durch
+				DBBlock currBlock = db[i];
+				Iterator<Record> recordIterator = new DBIterator();
 
-			if (insertSuccess == -1) {
+				while(recordIterator.hasNext()){
+					Record currRecord = recordIterator.next();
 
-				//System.out.println("Block ist voll");
-				recordCounter += currBlock.getNumberOfRecords();
-			} else {
-
-				return recordCounter;
+					//Vergleich der Mitgliedsnummer von Record in der DB und dem einzufügendem Record
+					if(Integer.parseInt(currRecord.getAttribute(1)) > Integer.parseInt(record.getAttribute(1))){
+						return currBlock.insertRecordAtRightPos(findPos(currRecord.getAttribute(1)));
+					}
+				}
+				recordCounter+= currBlock.getNumberOfRecords();
 			}
-		} return -1;
+		}
+
+		else{
+
+
+			for (int i = 0; i < db.length; i++) { // gehe die ganzen Blöcke der DB durch
+
+				DBBlock currBlock = db[i];
+
+				int insertSuccess = currBlock.insertRecordAtTheEnd(record);
+
+				if (insertSuccess == -1) {
+
+					//System.out.println("Block ist voll");
+					recordCounter += currBlock.getNumberOfRecords();
+				} else {
+
+					return recordCounter;
+				}
+			}
+
+		}
+		return -1;
 	}
 	
 	/**

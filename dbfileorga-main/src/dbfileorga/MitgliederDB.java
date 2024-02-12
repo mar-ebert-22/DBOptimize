@@ -179,8 +179,8 @@ public class MitgliederDB implements Iterable<Record>
 					Record currRecord = recordIterator.next();
 
 					//Vergleich der Mitgliedsnummer von Record in der DB und dem einzufügendem Record
-					if(Integer.parseInt(currRecord.getAttribute(1)) > Integer.parseInt(record.getAttribute(1))){
-						return currBlock.insertRecordAtRightPos(findPos(currRecord.getAttribute(1)));
+					if(Integer.parseInt(record.getAttribute(1)) < Integer.parseInt(currRecord.getAttribute(1))){
+						shiftRecords(findPos(currRecord.getAttribute(1)) -1 , i);
 					}
 				}
 				recordCounter+= currBlock.getNumberOfRecords();
@@ -208,6 +208,15 @@ public class MitgliederDB implements Iterable<Record>
 
 		}
 		return -1;
+	}
+
+	public void shiftRecords(int recNum, int currBlockNr){
+		//alle Datensätze nach dieser recNum sollen um 1 nach hinten verschoben werden
+		DBBlock currBlock = db[currBlockNr];
+		if(currBlock.getNumberOfRecords() == 5 ){
+
+		}
+
 	}
 	
 	/**

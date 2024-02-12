@@ -19,7 +19,7 @@ public class StartMitgliederDB {
 
 			//System.out.println(recNum);
 			//System.out.println(rec);
-//
+
 //			//insert Hans Meier
 			//int newRecNum = db.insert(new Record("122;2;44;Meier;Hans;07.05.01;01.03.10;120;15"));
 			//System.out.println(db.read(newRecNum));

@@ -66,6 +66,21 @@ public class DBBlock implements Iterable<Record> {
 		}
 		return count;
 	}
+
+	public int getCharsBeforeFoundRecord(Record foundRecord){
+		int count = 0;
+		Iterator<Record> iterator = new BlockIterator();
+
+		while(iterator.hasNext()){
+			Record currRecord = iterator.next();
+			if(currRecord.getAttribute(1).equals(foundRecord.getAttribute(1))){
+				break;
+			}
+			count += currRecord.length() + 1;
+		}
+		return count;
+
+	}
 	
 	/**
 	 * Inserts an record at the end of the block
@@ -87,33 +102,32 @@ public class DBBlock implements Iterable<Record> {
 	}
 
 	public void deleteRecord(int recNum) {
-		int currRecNum = 1; // Beginne mit 1
+		int currRecNum = 1;
 		int startPos = -1;
 
 		for (int i = 0; i < block.length; i++) {
 			if (block[i] == RECDEL) {
-				//recNum checken
 				if (currRecNum == recNum) {
 					startPos = i + 1;
 					break;
 				}
-				currRecNum++; //nächsten Datensatz
+				currRecNum++;
 			}
 		}
 
 		if (startPos != -1) {
-
 			int endPos = getEndPosOfRecord(startPos);
 
-
 			if (endPos != -1) {
-				//  nachfolgenden Datensätze nach vorne
+				// Verschiebe die nachfolgenden Datensätze nach vorne
 				int length = endPos - startPos;
+
 				System.arraycopy(block, endPos, block, startPos, block.length - endPos);
 
-				//restlichen Zeichen am Ende auf DEFCHAR
+				// Setze die übriggebliebenen Zeichen am Ende auf DEFCHAR
 				for (int i = block.length - length; i < block.length; i++) {
 					block[i] = DEFCHAR;
+
 				}
 			}
 		}
@@ -127,9 +141,11 @@ public class DBBlock implements Iterable<Record> {
 	 * @return returns the last position (the position of the RECDEL char) of the inserted record 
 	 * 		   returns -1 if the insert fails
 	 */	
-	private int insertRecordAtPos(int startPos, Record record) {
-		//we need to insert the record plus the RECDEL 
+	public int insertRecordAtPos(int startPos, Record record) {
+		//insert record + Trennzeichen RECDEL
+
 		int n = record.length();
+
 		if (startPos+n+1 > block.length){
 			return -1; // record does not fit into the block;
 		}
@@ -139,9 +155,6 @@ public class DBBlock implements Iterable<Record> {
 		block[n+startPos]= RECDEL;
 		return n+startPos;
 	}
-
-	
-
 
 	private int findEmptySpace(){
 		for (int i = 0; i < block.length;++i){
@@ -155,18 +168,18 @@ public class DBBlock implements Iterable<Record> {
 	@Override
 	public String toString(){
 		String result = new String();
-		for (int i = 0; i <block.length;++i){
-			if (block[i] == DEFCHAR){
-				return result;
+		String tempRecord = new String();
+		for (int i = 0; i < block.length; ++i) {
+			if (block[i] == RECDEL) {
+				if (!tempRecord.trim().isEmpty()) {
+					result += tempRecord + "\n";
+				}
+				tempRecord = "";
+			} else if (block[i] != DEFCHAR) {
+				tempRecord += block[i];
 			}
-			if (block[i] == RECDEL){
-				result += "\n";
-			}else{
-				result += block[i];
-			}
-			
 		}
-		return result; 
+		return result;
 	}
 
 

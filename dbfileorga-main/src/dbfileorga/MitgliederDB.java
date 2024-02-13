@@ -167,28 +167,30 @@ public class MitgliederDB implements Iterable<Record>
 	public int insert(Record record, Boolean sorted){
 
 		int recordCounter = 1;
-
+		int toInsertPos = 0;
 
 		if(sorted){
-
 			for (int i = 0; i < db.length; i++) { // gehe die ganzen Blöcke der DB durch
 				DBBlock currBlock = db[i];
-				Iterator<Record> recordIterator = new DBIterator();
+
+				Iterator<Record> recordIterator = currBlock.iterator();
 
 				while(recordIterator.hasNext()){
 					Record currRecord = recordIterator.next();
 
+					System.out.println("Record iterating");
 					//Vergleich der Mitgliedsnummer von Record in der DB und dem einzufügendem Record
 					if(Integer.parseInt(record.getAttribute(1)) < Integer.parseInt(currRecord.getAttribute(1))){
-						shiftRecords(findPos(currRecord.getAttribute(1)) -1 , i);
+
+						if(isBlockFull(currBlock)){
+							shiftRecords(currBlock, findPos(currRecord.getAttribute(1)));
+						}
 					}
 				}
-				recordCounter+= currBlock.getNumberOfRecords();
+
 			}
-		}
 
-		else{
-
+		}else{
 
 			for (int i = 0; i < db.length; i++) { // gehe die ganzen Blöcke der DB durch
 
@@ -210,15 +212,16 @@ public class MitgliederDB implements Iterable<Record>
 		return -1;
 	}
 
-	public void shiftRecords(int recNum, int currBlockNr){
-		//alle Datensätze nach dieser recNum sollen um 1 nach hinten verschoben werden
-		DBBlock currBlock = db[currBlockNr];
-		if(currBlock.getNumberOfRecords() == 5 ){
-
+	public boolean isBlockFull(DBBlock block){
+		if(block.getNumberOfRecords() == 5 ){
+			return true;
 		}
+		return false;
+	}
+
+	public void shiftRecords(DBBlock b, int recNum){
 
 	}
-	
 	/**
 	 * Deletes the record specified 
 	 * @param numRecord number of the record to be deleted
@@ -253,27 +256,36 @@ public class MitgliederDB implements Iterable<Record>
 	 */
 	//numRecord = Datensatznummer; record = geänderter Datensatz
 	public void modify(int numRecord, Record record){
-		//Datensatz suchen
+
 		//Datensatz nicht vorhanden
 		if(numRecord == -1){
 			System.out.println("Record not modifiable");
 		}
-		int recordCounter = 1;
+		//Datensatz suchen
+		int recordCounter = 0;
 		for (int i = 0; i < db.length; i++) { // gehe die ganzen Blöcke der DB durch
 			DBBlock currBlock = db[i];
 
 			if(numRecord <= (recordCounter + db[i].getNumberOfRecords())){
-				delete(numRecord);
-				System.out.println("yo");
-				currBlock.insertRecordAtTheEnd(record);
-				//insert(record);
-				System.out.println("hab inserted bre");
+				int recordIndexInBlock = numRecord - recordCounter;
+				Record foundRecord = currBlock.getRecord(recordIndexInBlock);
+
+				int insertPos = currBlock.getCharsBeforeFoundRecord(foundRecord);
+				if(foundRecord != null){
+					currBlock.insertRecordAtPos(insertPos, record);
+					System.out.println("Record " + foundRecord.getAttribute(1) + " got modified");
+					return;
+				}else{
+					System.out.println("Record not found");
+					return;
+				}
 			}
 			else{
-				recordCounter += db[i].getNumberOfRecords();
+				recordCounter += currBlock.getNumberOfRecords();
 			}
 		}
 	}
+
 
 	
 	@Override

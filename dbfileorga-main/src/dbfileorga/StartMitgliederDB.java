@@ -30,11 +30,11 @@ public class StartMitgliederDB {
 			db.modify(db.findPos("95"), new Record("95;3;13;Bach;Steffi;17.08.08;01.01.17;;2,5"));
 			db.modify(db.findPos("125"), new Record("125;3;13;Mahnisch;Wilfried;17.08.08;01.01.17;;2,5"));
 
-			db.delete(db.findPos("57"));
+			db.delete(db.findPos("95"));
 			//db.insert(new Record("125;2;44;Ficker;Hans;07.05.01;01.03.10;120;15"), false);
 			//db.insert(new Record("125;2;44;Ficker;Hans;07.05.01;01.03.10;120;15"), false);
 
-		System.out.println(db);
+		    System.out.println(db);
 //
 //			//delete the record with Mitgliedsnummer 95
 			//db.delete(db.findPos("95"));

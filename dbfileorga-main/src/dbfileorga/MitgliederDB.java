@@ -158,7 +158,9 @@ public class MitgliederDB implements Iterable<Record>
 		}
 			return -1;
 	}
-	
+
+
+
 	/**
 	 * Inserts the record into the file and returns the record number
 	 * @param record
@@ -169,6 +171,7 @@ public class MitgliederDB implements Iterable<Record>
 		int recordCounter = 1;
 		int toInsertPos = 0;
 
+
 		if(sorted){
 			for (int i = 0; i < db.length; i++) { // gehe die ganzen Blöcke der DB durch
 				DBBlock currBlock = db[i];
@@ -177,20 +180,24 @@ public class MitgliederDB implements Iterable<Record>
 
 				while(recordIterator.hasNext()){
 					Record currRecord = recordIterator.next();
-
-					System.out.println("Record iterating");
+					System.out.println("Iterating records");
 					//Vergleich der Mitgliedsnummer von Record in der DB und dem einzufügendem Record
-					if(Integer.parseInt(record.getAttribute(1)) < Integer.parseInt(currRecord.getAttribute(1))){
 
-						if(isBlockFull(currBlock)){
-							shiftRecords(currBlock, findPos(currRecord.getAttribute(1)));
-						}
+					if(Integer.parseInt(record.getAttribute(1)) < Integer.parseInt(currRecord.getAttribute(1))){
+							//currBlock.insertRecordAtPos(currBlock.getCharsBeforeFoundRecord(currRecord),record);
 					}
+					else if(record.getAttribute(1).equals(currRecord.getAttribute(1))){
+						System.out.println("Keine Duplikate möglich");
+						break;
+					}
+					recordCounter++;
 				}
 
 			}
 
-		}else{
+		}
+		//wenn Datenbank unsortiert vorliegt dann insert() mit dieser Logik
+		else{
 
 			for (int i = 0; i < db.length; i++) { // gehe die ganzen Blöcke der DB durch
 
@@ -199,8 +206,9 @@ public class MitgliederDB implements Iterable<Record>
 				int insertSuccess = currBlock.insertRecordAtTheEnd(record);
 
 				if (insertSuccess == -1) {
-
 					//System.out.println("Block ist voll");
+					//Block ist voll und der Count der records wird um die Anzahl der Records in
+					//dem Datensatz erhöht
 					recordCounter += currBlock.getNumberOfRecords();
 				} else {
 
@@ -212,16 +220,6 @@ public class MitgliederDB implements Iterable<Record>
 		return -1;
 	}
 
-	public boolean isBlockFull(DBBlock block){
-		if(block.getNumberOfRecords() == 5 ){
-			return true;
-		}
-		return false;
-	}
-
-	public void shiftRecords(DBBlock b, int recNum){
-
-	}
 	/**
 	 * Deletes the record specified 
 	 * @param numRecord number of the record to be deleted
@@ -270,8 +268,13 @@ public class MitgliederDB implements Iterable<Record>
 				int recordIndexInBlock = numRecord - recordCounter;
 				Record foundRecord = currBlock.getRecord(recordIndexInBlock);
 
-				int insertPos = currBlock.getCharsBeforeFoundRecord(foundRecord);
+
 				if(foundRecord != null){
+
+					currBlock.deleteRecord(recordIndexInBlock);
+
+					int insertPos = currBlock.getCharsBeforeFoundRecord(foundRecord);
+
 					currBlock.insertRecordAtPos(insertPos, record);
 					System.out.println("Record " + foundRecord.getAttribute(1) + " got modified");
 					return;

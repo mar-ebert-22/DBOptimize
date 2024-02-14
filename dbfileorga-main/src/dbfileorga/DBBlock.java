@@ -40,7 +40,7 @@ public class DBBlock implements Iterable<Record> {
 		}
 	}
 
-	private int getEndPosOfRecord(int startPos){
+	public int getEndPosOfRecord(int startPos){
 		int currPos = startPos;
 		while( currPos < block.length ){
 			if (block[currPos]==RECDEL){
@@ -51,7 +51,7 @@ public class DBBlock implements Iterable<Record> {
 		}
 		return -1;
 	}
-	
+
 	
 	/**
 	 * Returns the number of records that are in the block
@@ -81,6 +81,7 @@ public class DBBlock implements Iterable<Record> {
 		return count;
 
 	}
+
 	
 	/**
 	 * Inserts an record at the end of the block
@@ -132,6 +133,8 @@ public class DBBlock implements Iterable<Record> {
 			}
 		}
 	}
+
+
 	
 
 	/**
@@ -189,8 +192,23 @@ public class DBBlock implements Iterable<Record> {
 
 		return new BlockIterator();
 	}
-	
-	
+
+	public Record getFirstRecord() {
+		String copy = new String();
+
+		for (int i = 0; i < block.length; i++){
+
+			if (block[i] == RECDEL){
+				break;
+			}
+			copy += block[i];
+
+		}
+		Record firstRec = new Record(copy);
+		return firstRec;
+	}
+
+
 	private class BlockIterator implements Iterator<Record> {
 	    private int currRec=0;
  

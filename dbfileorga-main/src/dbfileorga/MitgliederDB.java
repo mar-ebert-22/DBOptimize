@@ -2,28 +2,30 @@ package dbfileorga;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.*;
 
 public class MitgliederDB implements Iterable<Record>
 {
-	
+
 	protected DBBlock db[] = new DBBlock[8];
-	
-	
-	public MitgliederDB(boolean ordered){
+	private boolean sorted;
+
+	public MitgliederDB(boolean sorted){
 		this();
-		insertMitgliederIntoDB(ordered);
-		
+		this.sorted = sorted;
+		insertMitgliederIntoDB(sorted);
+
 	}
 	public MitgliederDB(){
 
 		initDB();
 	}
-	
+
 	private void initDB() {
 		for (int i = 0; i<db.length; ++i){
 			db[i]= new DBBlock();
 		}
-		
+
 	}
 	private void insertMitgliederIntoDB(boolean ordered) {
 		MitgliederTableAsArray mitglieder = new MitgliederTableAsArray();
@@ -35,10 +37,10 @@ public class MitgliederDB implements Iterable<Record>
 		}
 		for (String currRecord : mitgliederDatasets ){
 			appendRecord(new Record(currRecord));
-		}	
+		}
 	}
 
-		
+
 	protected int appendRecord(Record record){
 		//search for block where the record should be appended
 		int currBlock = getBlockNumOfRecord(getNumberOfRecords());
@@ -50,7 +52,7 @@ public class MitgliederDB implements Iterable<Record>
 		}
 		return -1;
 	}
-	
+
 
 	@Override
 	public String toString(){
@@ -62,7 +64,7 @@ public class MitgliederDB implements Iterable<Record>
 		}
 		return result;
 	}
-	
+
 	/**
 	 * Returns the number of Records in the Database
 	 * @return number of records stored in the database
@@ -74,9 +76,9 @@ public class MitgliederDB implements Iterable<Record>
 		}
 		return result;
 	}
-	
+
 	/**
-	 * Returns the block number of the given record number 
+	 * Returns the block number of the given record number
 	 * @param recNum the record number to search for
 	 * @return the block number or -1 if record is not found
 	 */
@@ -91,13 +93,13 @@ public class MitgliederDB implements Iterable<Record>
 		}
 		return -1;
 	}
-		
+
 	public DBBlock getBlock(int i){
 
 		return db[i];
 	}
-	
-	
+
+
 	/**
 	 * Returns the record matching the record number
 	 * @param recNum the term to search for
@@ -124,7 +126,7 @@ public class MitgliederDB implements Iterable<Record>
 
 		return null;
 	}
-	
+
 	/**
 	 * Returns the number of the first record that matches the search term
 	 * @param searchTerm the term to search for
@@ -137,26 +139,21 @@ public class MitgliederDB implements Iterable<Record>
 		int recordCounter = 1;
 
 		for (int i = 0; i < db.length; i++) { //gehe die ganzen Blöcke der DB durch
-
 			DBBlock currBlock = db[i];
-
+			//iteriere durch den Block und schaue jedem Records Mitgliedsnummer an (Attribut 1)
 			Iterator<Record> recordIterator = currBlock.iterator();
 
 			while(recordIterator.hasNext()){
-
 				if(searchTerm.equals(recordIterator.next().getAttribute(1))) {
 					System.out.println("ich bin hier rein gekommen");
 					return recordCounter ;
 				}
 				else{
-
 					recordCounter++;
 				}
-
 			}
-
 		}
-			return -1;
+		return -1;
 	}
 
 
@@ -166,152 +163,282 @@ public class MitgliederDB implements Iterable<Record>
 	 * @param record
 	 * @return the record number of the inserted record
 	 */
-	public int insert(Record record, Boolean sorted){
+	public int insert(Record record){
+		if(checkDuplicate(record)) {
+			if (sorted) {
 
-		int recordCounter = 1;
-		int toInsertPos = 0;
+				List<Record> recordList = new ArrayList<>();
 
 
-		if(sorted){
-			for (int i = 0; i < db.length; i++) { // gehe die ganzen Blöcke der DB durch
-				DBBlock currBlock = db[i];
-
-				Iterator<Record> recordIterator = currBlock.iterator();
-
-				while(recordIterator.hasNext()){
-					Record currRecord = recordIterator.next();
-					System.out.println("Iterating records");
-					//Vergleich der Mitgliedsnummer von Record in der DB und dem einzufügendem Record
-
-					if(Integer.parseInt(record.getAttribute(1)) < Integer.parseInt(currRecord.getAttribute(1))){
-							//currBlock.insertRecordAtPos(currBlock.getCharsBeforeFoundRecord(currRecord),record);
+				for (DBBlock dbBlock : db) {
+					int numberOfRecords = dbBlock.getNumberOfRecords();
+					for (int i = 1; i <= numberOfRecords; i++) {
+						//füge alle Records in die recordList hinzu
+						recordList.add(dbBlock.getRecord(i));
 					}
-					else if(record.getAttribute(1).equals(currRecord.getAttribute(1))){
-						System.out.println("Keine Duplikate möglich");
+				}
+				recordList.add(record);
+
+
+				Collections.sort(recordList, new Comparator<Record>() {
+					@Override
+					public int compare(Record r1, Record r2) {
+						int membNumR1 = Integer.parseInt(r1.getAttribute(1));
+						int membNumR2 = Integer.parseInt(r2.getAttribute(1));
+						return Integer.compare(membNumR1, membNumR2);
+					}
+				});
+
+				int insertPosition = -1;
+				for (int i = 0; i < recordList.size(); i++) {
+					if (record.equals(recordList.get(i))) {
+						insertPosition = i + 1;
 						break;
 					}
-					recordCounter++;
+				}
+				deleteDB();
+
+				int currBlock = 0;
+				for (Record sortedRecord : recordList) {
+					int result = db[currBlock].insertRecordAtTheEnd(sortedRecord);
+					if (result == -1) {
+						currBlock++;
+						if (currBlock < db.length) {
+							db[currBlock].insertRecordAtTheEnd(sortedRecord);
+						} else {
+							System.out.println("Einfügen gefailt - DB voll");
+							return -1;
+						}
+					}
 				}
 
-			}
+				return insertPosition;
 
-		}
-		//wenn Datenbank unsortiert vorliegt dann insert() mit dieser Logik
-		else{
-
-			for (int i = 0; i < db.length; i++) { // gehe die ganzen Blöcke der DB durch
-
-				DBBlock currBlock = db[i];
-
-				int insertSuccess = currBlock.insertRecordAtTheEnd(record);
-
-				if (insertSuccess == -1) {
-					//System.out.println("Block ist voll");
-					//Block ist voll und der Count der records wird um die Anzahl der Records in
-					//dem Datensatz erhöht
-					recordCounter += currBlock.getNumberOfRecords();
-				} else {
-
-					return recordCounter;
+			} else {
+				int recNum = 0;
+				for (DBBlock dbBlock : db) {
+					recNum += dbBlock.getNumberOfRecords();
+					int result = dbBlock.insertRecordAtTheEnd(record);
+					if (result != -1) {
+						return recNum + 1;
+					}
 				}
+				return -1;
 			}
-
 		}
+		System.out.println("Mitgliedsnummer schon vergeben");
 		return -1;
 	}
 
+
 	/**
-	 * Deletes the record specified 
+	 * Deletes the record specified
 	 * @param numRecord number of the record to be deleted
 	 */
 	//numRecord ist Mitgliedsnummer
 	public void delete(int numRecord){
 
 		int recordCounter = 1;
+		boolean found = false;
 
-		for (int i = 0; i < db.length; i++) { // gehe die ganzen Blöcke der DB durch
+		for (int i = 0; i < db.length; i++) {
+			//Gehe durch alle Blöcke durch
 
-				DBBlock currBlock = db[i];
+			DBBlock currBlock = db[i];
+			int recordsInBlock = currBlock.getNumberOfRecords();
+			if (numRecord <= (recordCounter + recordsInBlock)) {
+				int recordIndex = numRecord - recordCounter;
+				currBlock.deleteRecord(recordIndex);
+				found = true;
+				//Delete, wenn die Db unsortiert vorliegt
+				if (!sorted) {
+					for (int j = i + 1; j < db.length; j++) {
+						DBBlock nextBlock = db[j];
+						Record firstRecordOfNextBlock = nextBlock.getRecord(1);
+						if (firstRecordOfNextBlock != null) {
+							boolean recordAlreadyExists = false;
+							// Check, ob erster Record des nextBlock schon im currBlock vorhanden ist
+							for (int k = 1; k <= recordsInBlock; k++) {
+								Record currentRecord = currBlock.getRecord(k);
+								if (currentRecord != null && currentRecord.equals(firstRecordOfNextBlock)) {
+									recordAlreadyExists = true;
+									break;
+								}
+							}
+							if (!recordAlreadyExists) {
 
-			if(numRecord <= (recordCounter + db[i].getNumberOfRecords())){
+								currBlock.insertRecordAtTheEnd(firstRecordOfNextBlock);
+								int lastRec = currBlock.getNumberOfRecords();
+								nextBlock.deleteRecord(lastRec);
 
-				currBlock.deleteRecord(numRecord-recordCounter);
-				System.out.println("Habs gelöscht bro");
+								// Update numRecords und recordIndex für den nächsten Block
+								recordsInBlock = currBlock.getNumberOfRecords();
+								recordIndex++;
+							}
+						}
+					}
+
+					if (i == db.length - 1 && !found) {
+						db[i].deleteRecord(db[i].getNumberOfRecords());
+					}
+				}
 				break;
+			} else {
+				recordCounter += recordsInBlock;
 			}
-			else{
-				recordCounter += db[i].getNumberOfRecords();
+		}
+		//Delete, wenn die DB sortiert vorliegt
+		if (sorted) {
+			List<Record> recordList = new ArrayList<>();
+			for (DBBlock dbBlock : db) {
+				int recCount = dbBlock.getNumberOfRecords();
+				for (int i = 1; i <= recCount; i++) {
+					Record currentRecord = dbBlock.getRecord(i);
+					if (currentRecord.getNumOfAttributes() > 1) {
+						recordList.add(currentRecord);
+					}
+				}
 			}
 
+			//Sortierung der Records in der DB mit der Rangfolge nach Mitgliedsnummern
+			Collections.sort(recordList, new Comparator<Record>() {
+				@Override
+				public int compare(Record r1, Record r2) {
+					String membNumR1 = r1.getAttribute(1);
+					String membNumR2 = r2.getAttribute(1);
+					//memberNumber, short membNum
+					//Vergleich der Mitgliedernummer, wenn eine Mitgliedsnummer null oder leer sein sollte
+					if (membNumR1 == null || membNumR1.isEmpty()  || membNumR2 == null || membNumR2.isEmpty() ) {
+						return 0;
+					}
+					int membNumR1AsInt = Integer.parseInt(membNumR1);
+					int membNumR2AsInt = Integer.parseInt(membNumR2);
+					return Integer.compare(membNumR1AsInt, membNumR2AsInt);
+				}
+			});
+			deleteDB();
+
+			int currBlock = 0;
+			for (Record sortedRecord : recordList) {
+				int result = db[currBlock].insertRecordAtTheEnd(sortedRecord);
+				if (result == -1) {
+					currBlock++;
+					if (currBlock < db.length) {
+						 db[currBlock].insertRecordAtTheEnd(sortedRecord);
+					} else {
+						System.out.println("Delete failed");
+					}
+				}
+			}
 		}
 	}
-	
+
 	/**
-	 * Replaces the record at the specified position with the given one.
+	 *
+	 * @param recIndex, die Recordnumber eines Records
+	 * @param blockNum, die Blocknummer
+	 * @return recIndex, berechnet innerhalb des Blocks
+	 */
+	private int getPositionOfBlockRecord(int recIndex, int blockNum) {
+		for (int i = 0; i < blockNum; ++i) {
+			DBBlock dbBlock = this.getBlock(i);
+			recIndex = recIndex - dbBlock.getNumberOfRecords();
+		}
+		return recIndex;
+	}
+
+	/**
+	 *
+	 * @param dbBlock, der Block der gerestockt werden soll
+	 * @param records, Listen an Records, welche den Inhalt des Block dann befüllen
+	 * löscht den Inhalt des Blocks und fügt die Records aus der List records wieder in den Block ein
+	 */
+	private void restockBlock(DBBlock dbBlock, List<Record> records) {
+		dbBlock.delete();
+		Iterator iterator = records.iterator();
+
+		while (iterator.hasNext()) {
+			Record record = (Record) iterator.next();
+			for(Record r: records){
+
+			}
+			dbBlock.insertRecordAtTheEnd(record);
+		}
+	}
+
+	/**
+	 * löscht die ganze DB inhatlich,
+	 * mit durchgehen der einzelnen Blöcke
+	 */
+	private void deleteDB(){
+		for (DBBlock dbBlock : db) {
+			dbBlock.delete();
+		}
+	}
+
+	/**
+	 * Replaces the record at the specified position with the given/updated one.
 	 * @param numRecord the position of the old record in the db
-	 * @param record the new record
-	 * 
+	 * @param record the new/updated record
+	 *
 	 */
 	//numRecord = Datensatznummer; record = geänderter Datensatz
 	public void modify(int numRecord, Record record){
 
-		//Datensatz nicht vorhanden
-		if(numRecord == -1){
-			System.out.println("Record not modifiable");
-		}
-		//Datensatz suchen
-		int recordCounter = 0;
-		for (int i = 0; i < db.length; i++) { // gehe die ganzen Blöcke der DB durch
-			DBBlock currBlock = db[i];
+			int blockIndex = this.getBlockNumOfRecord(numRecord);
+			DBBlock dbBlock = this.getBlock(blockIndex);
+			int positionOfRecord = this.getPositionOfBlockRecord(numRecord, blockIndex);
+			List<Record> blockRecords = new LinkedList();
 
-			if(numRecord <= (recordCounter + db[i].getNumberOfRecords())){
-				int recordIndexInBlock = numRecord - recordCounter;
-				Record foundRecord = currBlock.getRecord(recordIndexInBlock);
-
-
-				if(foundRecord != null){
-
-					currBlock.deleteRecord(recordIndexInBlock);
-
-					int insertPos = currBlock.getCharsBeforeFoundRecord(foundRecord);
-
-					currBlock.insertRecordAtPos(insertPos, record);
-					System.out.println("Record " + foundRecord.getAttribute(1) + " got modified");
-					return;
-				}else{
-					System.out.println("Record not found");
-					return;
+			for (int i = 1; i <= dbBlock.getNumberOfRecords(); ++i) {
+				if (i == positionOfRecord) {
+					blockRecords.add(record);
+				} else {
+					blockRecords.add(dbBlock.getRecord(i));
 				}
 			}
-			else{
-				recordCounter += currBlock.getNumberOfRecords();
-			}
-		}
+			this.restockBlock(dbBlock, blockRecords);
+
 	}
 
+    public boolean checkDuplicate(Record record){
+		boolean duplicate = false;
 
-	
+		for (int i = 0; i < db.length; i++) { //gehe die ganzen Blöcke der DB durch
+			DBBlock currBlock = db[i];
+			Iterator<Record> iterateBlock = new DBIterator();
+
+			while(iterateBlock.hasNext()){
+				Record currRec = iterateBlock.next();
+				if(currRec.getAttribute(1) == record.getAttribute(1)){
+					duplicate = true;
+				}
+			}
+		}
+			return duplicate;
+	}
+
 	@Override
 	public Iterator<Record> iterator() {
 		return new DBIterator();
 	}
- 
+
 	private class DBIterator implements Iterator<Record> {
 
 		    private int currBlock = 0;
 		    private Iterator<Record> currBlockIter= db[currBlock].iterator();
-	 
+
 	        public boolean hasNext() {
 	            if (currBlockIter.hasNext()){
-	                return true; 
+	                return true;
 	            } else if (currBlock < (db.length-1)) { //continue search in the next block
 	                return db[currBlock+1].iterator().hasNext();
-	            }else{ 
+	            }else{
 	                return false;
 	            }
 	        }
-	 
-	        public Record next() {	        	
+
+	        public Record next() {
 	        	if (currBlockIter.hasNext()){
 	        		return currBlockIter.next();
 	        	}else if (currBlock < db.length){ //continue search in the next block
@@ -321,13 +448,13 @@ public class MitgliederDB implements Iterable<Record>
 	        		throw new NoSuchElementException();
 	        	}
 	        }
-	 
+
 	        @Override
 	        public void remove() {
 
 				throw new UnsupportedOperationException();
 	        }
-	    } 
-	 
+	    }
+
 
 }

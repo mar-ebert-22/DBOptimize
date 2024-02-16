@@ -73,7 +73,8 @@ public class DBBlock implements Iterable<Record> {
 
 		while(iterator.hasNext()){
 			Record currRecord = iterator.next();
-			if(currRecord.getAttribute(1).equals(foundRecord.getAttribute(1))){
+			if(currRecord.getAttribute(1).compareTo(foundRecord.getAttribute(1)) == 0){
+				System.out.println("Zähle die Chars vor dem modified Record");
 				break;
 			}
 			count += currRecord.length() + 1;
@@ -105,7 +106,6 @@ public class DBBlock implements Iterable<Record> {
 	public void deleteRecord(int recNum) {
 		int currRecNum = 1;
 		int startPos = -1;
-
 		for (int i = 0; i < block.length; i++) {
 			if (block[i] == RECDEL) {
 				if (currRecNum == recNum) {
@@ -115,21 +115,13 @@ public class DBBlock implements Iterable<Record> {
 				currRecNum++;
 			}
 		}
-
 		if (startPos != -1) {
 			int endPos = getEndPosOfRecord(startPos);
-
 			if (endPos != -1) {
-				// Verschiebe die nachfolgenden Datensätze nach vorne
-				int length = endPos - startPos;
-
-				System.arraycopy(block, endPos, block, startPos, block.length - endPos);
-
-				// Setze die übriggebliebenen Zeichen am Ende auf DEFCHAR
-				for (int i = block.length - length; i < block.length; i++) {
-					block[i] = DEFCHAR;
-
-				}
+				// Shift the remaining records to cover the deleted record
+				System.arraycopy(block, endPos, block, startPos - 1, block.length - endPos);
+				// Set the last character to RECDEL to mark the end of the record
+				block[block.length - (endPos - startPos + 1)] = RECDEL;
 			}
 		}
 	}
